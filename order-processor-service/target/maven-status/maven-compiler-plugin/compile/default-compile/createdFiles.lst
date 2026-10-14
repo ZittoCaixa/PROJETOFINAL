@@ -1,0 +1,6 @@
+com\flashsale\processor\service\OrderProcessorService.class
+com\flashsale\processor\api\OrderResponse.class
+com\flashsale\processor\api\InternalOrderController.class
+com\flashsale\processor\domain\OrderRepository.class
+com\flashsale\processor\OrderProcessorServiceApplication.class
+com\flashsale\processor\domain\OrderEntity.class

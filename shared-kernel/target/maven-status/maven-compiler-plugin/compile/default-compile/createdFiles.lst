@@ -1,0 +1,4 @@
+com\flashsale\shared\EmbeddedRabbitBroker.class
+com\flashsale\shared\OrderCompensationEvent.class
+com\flashsale\shared\OrderCreatedEvent.class
+com\flashsale\shared\OrderStatus.class

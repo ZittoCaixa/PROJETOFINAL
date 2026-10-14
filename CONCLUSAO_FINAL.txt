@@ -264,6 +264,7 @@
   │   ├── service/
   │   │   ├── OrderService.java
   │   │   ├── OrderPublisher.java
+  │   │   ├── OrderProcessorForwarder.java (ponte HTTP checkout → processor)
   │   │   └── CompensationConsumer.java
   │   ├── infra/
   │   │   ├── InMemoryRedisStore.java

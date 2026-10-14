@@ -262,6 +262,7 @@ src/main/java/com/flashsale/checkout/api/
 src/main/java/com/flashsale/checkout/service/
 ├── OrderService.java             ← Orquestração principal
 ├── OrderPublisher.java           ← Publicador de eventos
+├── OrderProcessorForwarder.java  ← Encaminha order-created ao processor via HTTP
 └── CompensationConsumer.java     ← Consumidor de compensação
 
 src/main/java/com/flashsale/checkout/infra/

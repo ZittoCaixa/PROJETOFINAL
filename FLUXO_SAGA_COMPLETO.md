@@ -112,6 +112,13 @@ Próximo: Etapa 4
 
 **Arquivo**: `checkout-service/checkout/service/OrderPublisher.java`
 
+> **Atenção (ponte entre processos)**: o `EmbeddedRabbitBroker` é um singleton por JVM e não
+> atravessa os processos checkout (8083) e processor (8082). O componente
+> `checkout-service/.../service/OrderProcessorForwarder.java` assina `order-created` no broker do
+> checkout e encaminha o evento por HTTP (`POST http://localhost:8082/internal/orders`). Se a
+> resposta vier com `status = CANCELLED`, ele publica `order-compensation` no broker do checkout,
+> acionando o `CompensationConsumer`.
+
 ```java
 EmbeddedRabbitBroker.getInstance().publish("order-created", 
     new OrderCreatedEvent(
@@ -148,9 +155,10 @@ Próximo: Etapa 5
 **Serviço**: `OrderProcessorService`  
 **Subscrição**: `@PostConstruct void subscribe()`  
 **O que acontece**:
-1. Listener ativo em `order-created`
+1. Listener ativo em `order-created` (broker local) e endpoint `POST /internal/orders`
+   (`InternalOrderController`), usado pelo checkout para entregar o evento entre processos
 2. Recebe `OrderCreatedEvent`
-3. Chama `process(event)`
+3. Chama `process(event)` e, no endpoint, devolve o pedido com o status final
 
 **Arquivo**: `order-processor-service/processor/service/OrderProcessorService.java` (linha 26-31)
 

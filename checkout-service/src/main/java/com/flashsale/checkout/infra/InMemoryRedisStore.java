@@ -18,7 +18,7 @@ public class InMemoryRedisStore {
     private final Map<String, AtomicInteger> stock = new ConcurrentHashMap<>();
     private final Map<String, CacheEntry<OrderSnapshot>> orderCache = new ConcurrentHashMap<>();
 
-    public InMemoryRedisStore(@Value("${app.stock.initial:PROD-001:10,PROD-002:8}") String initialStock) {
+    public InMemoryRedisStore(@Value("${app.stock.initial:PROD-001:10,PROD-002:8,FAIL-001:10,FAIL-002:10}") String initialStock) {
         this.initialStock = initialStock;
         loadInitialStock();
     }
@@ -69,4 +69,3 @@ public class InMemoryRedisStore {
     private record CacheEntry<T>(T value, Instant expiresAt) {
     }
 }
-

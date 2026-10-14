@@ -11,4 +11,4 @@ app:
   processor:
     base-url: http://localhost:8082
   stock:
-    initial: PROD-001:10,PROD-002:8
+    initial: PROD-001:10,PROD-002:8,FAIL-001:10,FAIL-002:10

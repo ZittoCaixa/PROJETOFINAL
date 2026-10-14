@@ -54,6 +54,8 @@
 - Consumer automático via `@PostConstruct`
 - Subscreve em `order-created` ao inicializar
 - Implementação: `OrderProcessorService.subscribe()`
+- Entrega entre processos: `checkout-service` `OrderProcessorForwarder` → `POST /internal/orders` (`InternalOrderController`), pois o broker embedded é local à JVM
+- Em falha (`FAIL*`), o processor responde `CANCELLED` e o checkout publica `order-compensation` localmente
 - **Arquivo**: `order-processor-service/src/main/java/com/flashsale/processor/service/OrderProcessorService.java`
 
 ### Passo 08: Persistir o pedido em banco de dados

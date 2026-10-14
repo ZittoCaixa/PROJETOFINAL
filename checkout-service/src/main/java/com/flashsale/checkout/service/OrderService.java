@@ -23,6 +23,7 @@ import java.util.UUID;
 public class OrderService {
 
     private static final Duration CACHE_TTL = Duration.ofMinutes(5);
+    private static final int FAILURE_STATUS_ATTEMPTS = 10;
 
     private final InMemoryRedisStore redisStore;
     private final OrderPublisher orderPublisher;
@@ -84,9 +85,10 @@ public class OrderService {
         for (int attempt = 0; attempt < 3; attempt++) {
             Optional<OrderSnapshot> order = orderQueryGateway.findById(pedidoId);
             if (order.isPresent()) {
-                redisStore.putOrder(key, order.get(), CACHE_TTL);
-                trackingStore.upsert(order.get());
-                return order;
+                OrderSnapshot merged = mergeSnapshots(trackingStore.findById(pedidoId).orElse(null), order.get());
+                redisStore.putOrder(key, merged, CACHE_TTL);
+                trackingStore.upsert(merged);
+                return Optional.of(merged);
             }
             sleepSmallInterval();
         }
@@ -95,12 +97,46 @@ public class OrderService {
     }
 
     public List<OrderSnapshot> getOrders() {
+        for (int attempt = 0; attempt < FAILURE_STATUS_ATTEMPTS; attempt++) {
+            List<OrderSnapshot> orders = loadOrders();
+            if (!hasPendingFailure(orders)) {
+                return orders;
+            }
+            sleepSmallInterval();
+        }
+        return loadOrders();
+    }
+
+    private List<OrderSnapshot> loadOrders() {
         Map<UUID, OrderSnapshot> orders = new HashMap<>();
-        trackingStore.findAll().forEach(order -> orders.put(order.pedidoId(), order));
-        orderQueryGateway.findAll().forEach(order -> orders.put(order.pedidoId(), order));
+        trackingStore.findAll().forEach(order ->
+                orders.merge(order.pedidoId(), order, OrderService::mergeSnapshots));
+        orderQueryGateway.findAll().forEach(order ->
+                orders.merge(order.pedidoId(), order, OrderService::mergeSnapshots));
         return orders.values().stream()
                 .sorted(Comparator.comparing(OrderSnapshot::dataHoraAtualizacao).reversed())
                 .toList();
+    }
+
+    private boolean hasPendingFailure(List<OrderSnapshot> orders) {
+        return orders.stream()
+                .anyMatch(order -> order.status() == OrderStatus.PROCESSING
+                        && order.produtoId().startsWith("FAIL"));
+    }
+
+    private static OrderSnapshot mergeSnapshots(OrderSnapshot current, OrderSnapshot incoming) {
+        if (current == null) {
+            return incoming;
+        }
+        if (current.status() != OrderStatus.PROCESSING && incoming.status() == OrderStatus.PROCESSING) {
+            return current;
+        }
+        if (current.status() == OrderStatus.PROCESSING && incoming.status() != OrderStatus.PROCESSING) {
+            return incoming;
+        }
+        return incoming.dataHoraAtualizacao().isAfter(current.dataHoraAtualizacao())
+                ? incoming
+                : current;
     }
 
     private void sleepSmallInterval() {

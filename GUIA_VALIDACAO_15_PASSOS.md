@@ -169,6 +169,7 @@ mvn test -Dtest=OrderProcessorServiceTest#shouldConfirmOrderWhenProcessingSuccee
 
 **Arquivo**: 
 - `checkout-service/src/main/java/com/flashsale/checkout/service/OrderPublisher.java`
+- `checkout-service/src/main/java/com/flashsale/checkout/service/OrderProcessorForwarder.java` (o broker embedded é local à JVM; este componente entrega o evento ao processor via `POST /internal/orders`)
 - `shared-kernel/src/main/java/com/flashsale/shared/OrderCreatedEvent.java`
 
 ---

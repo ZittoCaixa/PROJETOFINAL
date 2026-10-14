@@ -133,6 +133,7 @@ GET    /v1/orders/{id}     - Consultar status do pedido
 ```
 GET    /internal/orders/{id}  - Consulta interna de pedidos
 GET    /internal/orders       - Consulta interna de pedidos em lote
+POST   /internal/orders       - Recebe OrderCreatedEvent do checkout (OrderProcessorForwarder) e retorna o pedido processado
 ```
 
 **Tecnologias:**
@@ -374,6 +375,7 @@ PROJETOFINAL/
 │       ├── service/
 │       │   ├── OrderService.java            (Orquestração)
 │       │   ├── OrderPublisher.java          (Publicador)
+│       │   ├── OrderProcessorForwarder.java (Ponte HTTP checkout → processor)
 │       │   ├── CompensationConsumer.java    (Consumidor de compensação)
 │       │   └── BusinessException.java
 │       ├── infra/
